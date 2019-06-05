@@ -1,0 +1,5 @@
+# exclude everything
+SFND_Lidar_Obstacle_Detection/build/*
+
+# exception to the rule
+# !somefolder/.gitkeep 
