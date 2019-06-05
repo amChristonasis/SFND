@@ -1,5 +1,6 @@
 # exclude everything
 SFND_Lidar_Obstacle_Detection/build/*
+SFND_Lidar_Obstacle_Detection/src/quiz/ransac/build/*
 
 # exception to the rule
 # !somefolder/.gitkeep 
