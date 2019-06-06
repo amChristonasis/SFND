@@ -8,6 +8,7 @@
 #include "../../processPointClouds.cpp"
 #include <cstdlib>
 #include <cmath>
+#include <chrono>
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData()
 {
@@ -93,33 +94,77 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
       inliersResult = inliersResultI;
     }
   }
-
-	// Randomly sample subset and fit line
-
-	// Measure distance between every point and fitted line
-	// If distance is smaller than threshold count it as inlier
-
-	// Return indicies of inliers from fitted line with most inliers
-	
-	return inliersResult;
-
 }
+
+
+// std::unordered_set<int> Ransac3D(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol)
+// {
+// 	std::unordered_set<int> inliersResult;
+// 	srand(time(NULL));
+	
+// 	auto startTime = std::chrono::steady_clock::now();
+
+// 	int cpt_max = 0;
+// 	for (int it = 0; it < maxIterations; it ++){
+// 		std::unordered_set<int> inliersResultI;
+// 		int n1(rand() % cloud->points.size());
+// 		int n2(rand() % cloud->points.size());
+// 		int n3(rand() % cloud->points.size());
+// 		float coeff_a = (cloud->points[n2].y - cloud->points[n1].y)*(cloud->points[n3].z-cloud->points[n1].z)-
+// 				(cloud->points[n2].z-cloud->points[n1].z)*(cloud->points[n3].y-cloud->points[n1].y);
+// 		float coeff_b = (cloud->points[n2].z - cloud->points[n1].z)*(cloud->points[n3].x-cloud->points[n1].x)-
+// 				(cloud->points[n2].x-cloud->points[n1].x)*(cloud->points[n3].z-cloud->points[n1].z);
+// 		float coeff_c = (cloud->points[n2].x - cloud->points[n1].x)*(cloud->points[n3].y-cloud->points[n1].y)-
+// 				(cloud->points[n2].y-cloud->points[n1].y)*(cloud->points[n3].x-cloud->points[n1].x);
+// 		float coeff_d = -(coeff_a*cloud->points[n1].x+coeff_b*cloud->points[n1].y+coeff_c*cloud->points[n1].z);
+// 		int cpt = 0;
+// 		for (int i = 0; i < cloud->points.size (); ++i){
+// 		if (i == n1 || i == n2 | i == n3)
+// 			continue;
+// 		float distance_to_plan = std::fabs(coeff_a*cloud->points[i].x+coeff_b*cloud->points[i].y+coeff_c*cloud->points[i].z+coeff_d)/
+// 				std::sqrt(coeff_a*coeff_a+coeff_b*coeff_b+coeff_c*coeff_c);
+// 		if (distance_to_plan <= distanceTol)
+// 		{
+// 			++cpt;
+// 			inliersResultI.insert(i);
+// 		}
+// 		}
+// 		if (cpt > cpt_max){
+// 		inliersResult = inliersResultI;
+// 		}
+// 	}
+
+// 	auto endTime = std::chrono::steady_clock::now();
+//     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+//     std::cout << "Ransac calulation took " << elapsedTime.count() << " milliseconds" << std::endl;
+
+// 	return inliersResult;
+// }
 
 int main ()
 {
+	std::cout << "T-1";
 
 	// Create viewer
 	pcl::visualization::PCLVisualizer::Ptr viewer = initScene();
+	std::cout << "T0";
+
 
 	// Create data
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData();
 	
-
+	std::cout << "T1";
 	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
-	std::unordered_set<int> inliers = Ransac(cloud, 10, 1.0);
+	std::unordered_set<int> inliers = Ransac(cloud, 100, 1.0);
+	std::cout << "T2";
+
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr  cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
+	std::cout << "T3";
+
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());
+	std::cout << "T4";
+
 
 	for(int index = 0; index < cloud->points.size(); index++)
 	{
@@ -130,6 +175,7 @@ int main ()
 			cloudOutliers->points.push_back(point);
 	}
 
+	std::cout << "T5";
 
 	// Render 2D point cloud with inliers and outliers
 	if(inliers.size())
@@ -142,6 +188,8 @@ int main ()
   		renderPointCloud(viewer,cloud,"data");
   	}
 	
+	std::cout << "T6";
+
   	while (!viewer->wasStopped ())
   	{
   	  viewer->spinOnce ();
