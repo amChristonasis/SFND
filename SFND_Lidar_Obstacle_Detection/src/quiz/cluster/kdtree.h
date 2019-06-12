@@ -2,6 +2,8 @@
 // Quiz on implementing kd tree
 
 #include "../../render/render.h"
+#include <cmath>
+#include <iostream>
 
 
 // Structure to represent node of kd tree
@@ -30,7 +32,7 @@ struct KdTree
 		// TODO: Fill in this function to insert a new point into the tree
 		// the function should create a new node and place correctly with in the root
 		int n = 0;
-		insertHelper(*root, point, id, n);
+		insertHelper(&root, point, id, n);
 
 	}
 
@@ -71,10 +73,38 @@ struct KdTree
 	std::vector<int> search(std::vector<float> target, float distanceTol)
 	{
 		std::vector<int> ids;
+		searchHelper(root, target, distanceTol, ids, 0);
 		return ids;
 	}
-	
 
+	void searchHelper(Node* node, std::vector<float> target, float distanceTol, std::vector<int>& ids, int depth)
+	{
+		if (node != NULL)
+		{
+			if (std::abs(node->point[0] - target[0]) <= distanceTol && std::abs(node->point[1] - target[1]) <= distanceTol)
+			{
+				if (std::sqrt(std::pow(node->point[0] - target[0],2) + std::pow(node->point[1] - target[1],2)) <= distanceTol)
+				{
+					ids.push_back(node->id);
+					// std::cout << "Push back : " << node->id << std::endl;
+				}
+			}
+		
+			unsigned int n = depth%2;
+
+			if (target[n] - distanceTol < node->point[n])
+			{
+				// std::cout << "Got to left : " << std::endl;
+				searchHelper(node->left, target, distanceTol, ids, depth + 1);
+			}
+			if (target[n] + distanceTol > node->point[n])
+			{
+				// std::cout << "Got to right : " << std::endl;
+				searchHelper(node->right, target, distanceTol, ids, depth + 1);
+			}
+		}
+	}
+	
 };
 
 
