@@ -27,13 +27,43 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
 
-    // TODO:: Fill in the function to do voxel grid point reduction and region based filtering
+    typename pcl::PointCloud<PointT>::Ptr cloud_filtered (new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr cloud_crop (new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr cloud_crop_roof (new pcl::PointCloud<PointT>());
+    pcl::CropBox<PointT> crop(true);
+    pcl::VoxelGrid<PointT> sor;
+    sor.setInputCloud (cloud);
+    sor.setLeafSize (filterRes, filterRes, filterRes);
+    sor.filter (*cloud_filtered);
+
+    crop.setMin(minPoint);
+    crop.setMax(maxPoint);
+    crop.setInputCloud(cloud_filtered);
+    crop.filter(*cloud_crop);
+
+    std::vector<int> indices;
+    pcl::CropBox<PointT> roof(true);
+    roof.setMin(Eigen::Vector4f(-1.5,-1.7,-1,1));
+    roof.setMax(Eigen::Vector4f(2.6,1.7,-0.4,1));
+    roof.setInputCloud(cloud_crop);
+    roof.filter(indices);
+
+    pcl::PointIndices::Ptr inliers {new pcl::PointIndices};
+    for(int point : indices) {
+        inliers->indices.push_back(indices[point]);
+    }
+
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud (cloud_crop);
+    extract.setIndices (inliers);
+    extract.setNegative (true);
+    extract.filter (*cloud_crop_roof);
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "filtering took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    return cloud;
+    return cloud_crop_roof;
 
 }
 
@@ -48,7 +78,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
     for (int index : inliers->indices)
         plan_cloud->points.push_back(cloud->points[index]);
     // Create the filtering object
-    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    pcl::ExtractIndices<PointT> extract;
     extract.setInputCloud (cloud);
     extract.setIndices (inliers);
     extract.setNegative (true);
