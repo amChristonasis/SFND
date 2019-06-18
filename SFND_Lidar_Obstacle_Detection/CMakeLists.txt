@@ -14,10 +14,10 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
-add_library(ransac_lib src/quiz/ransac/ransac_lib.cpp)
+# add_library(ransac_lib src/quiz/ransac/ransac_lib.cpp)
 
 add_executable (environment src/environment.cpp src/render/render.cpp src/processPointClouds.cpp)
 target_link_libraries (environment ${PCL_LIBRARIES})
 
-add_executable (project src/project.cpp src/render/render.cpp src/processPointClouds.cpp ransac_lib ) # src/quiz/cluster/cluster_lib.cpp)
+add_executable (project src/project.cpp src/render/render.cpp src/processPointClouds.cpp) # src/quiz/cluster/cluster_lib.cpp)
 target_link_libraries (project ${PCL_LIBRARIES})
