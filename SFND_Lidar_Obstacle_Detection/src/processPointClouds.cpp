@@ -62,7 +62,7 @@ std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(typen
 }
 
 template<typename PointT>
-std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance)
+std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
 {
     // Create KDtree
     KdTree* tree = new KdTree;
@@ -91,7 +91,8 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::c
         typename pcl::PointCloud<PointT>::Ptr clusterCloud(new pcl::PointCloud<PointT>());
         for(int indice: cluster)
             clusterCloud->points.push_back(cloud->points[indice]);
-        cluster_clouds.push_back(clusterCloud);
+        if (clusterCloud->points.size() < maxSize && clusterCloud->points.size() > minSize)
+            cluster_clouds.push_back(clusterCloud);
         ++clusterId;
     }
 

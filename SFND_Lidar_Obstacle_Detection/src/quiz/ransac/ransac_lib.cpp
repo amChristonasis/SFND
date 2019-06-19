@@ -10,8 +10,9 @@
 #include <cmath>
 #include <chrono>
 
+
 template<typename PointT>
-std::unordered_set<int> Ransac3D(pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol)
+std::unordered_set<int> ransac3D(pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol)
 {
     std::unordered_set<int> inliersResult;
     srand(time(NULL));
@@ -96,7 +97,7 @@ std::pair<pcl::PointCloud<PointT>::Ptr, pcl::PointCloud<PointT>::Ptr> segmentClo
 {
 
     // TODO: Change the max iteration and distance tolerance arguments for Ransac function
-    std::unordered_set<int> inliers = Ransac3D(cloud, maxIterations, distanceTol);
+    std::unordered_set<int> inliers = ransac3D(cloud, maxIterations, distanceTol);
 
     typename pcl::PointCloud<PointT>::Ptr plan_cloud(new pcl::PointCloud<PointT>());
     typename pcl::PointCloud<PointT>::Ptr obstacles_cloud(new pcl::PointCloud<PointT>());

@@ -39,7 +39,7 @@ public:
 
     std::vector<std::vector<int>> euclideanCluster(typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol);
 
-    std::vector<typename pcl::PointCloud<PointT>::Ptr> clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance);
+    std::vector<typename pcl::PointCloud<PointT>::Ptr> clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize);
 
     std::unordered_set<int> ransac3D(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol);
 
