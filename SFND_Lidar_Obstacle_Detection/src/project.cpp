@@ -46,11 +46,11 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
     pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
     pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud;
     // renderPointCloud(viewer,inputCloud,"inputCloud");
-    filterCloud = pointProcessorI->FilterCloud(inputCloud, 0.2 , Eigen::Vector4f (0, -30, -6, 1), Eigen::Vector4f ( 10, 30, 6, 1));
+    filterCloud = pointProcessorI->FilterCloud(inputCloud, 0.2 , Eigen::Vector4f (-30, -6, -5, 1), Eigen::Vector4f ( 30, 6, 10, 1));
     // renderPointCloud(viewer,filterCloud,"filterCloud");
     
     // TODO : Change in ransac3D
-    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = pointProcessorI -> segmentCloud(filterCloud, 200, 0.2);
+    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = pointProcessorI -> segmentCloud(filterCloud, 1000, 0.3);
     // renderPointCloud(viewer,segmentCloud.first,"obstCloud",Color(1,0,0));
     renderPointCloud(viewer,segmentCloud.second,"planeCloud",Color(0,1,0));
     Box box_roof;

@@ -35,9 +35,9 @@ public:
 
     void numPoints(typename pcl::PointCloud<PointT>::Ptr cloud);
 
-    void proximity(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol, int id, std::vector<int>& cluster, std::vector<int>& proccessed_ids);
+    void proximity(typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol, int id, std::vector<int>& cluster, std::vector<int>& proccessed_ids);
 
-    std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol);
+    std::vector<std::vector<int>> euclideanCluster(typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol);
 
     std::vector<typename pcl::PointCloud<PointT>::Ptr> clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance);
 

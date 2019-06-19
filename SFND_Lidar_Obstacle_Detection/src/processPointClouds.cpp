@@ -20,39 +20,43 @@ void ProcessPointClouds<PointT>::numPoints(typename pcl::PointCloud<PointT>::Ptr
 }
 
 template<typename PointT>
-void ProcessPointClouds<PointT>::proximity(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol, int id, std::vector<int>& cluster, std::vector<int>& proccessed_ids)
+void ProcessPointClouds<PointT>::proximity(typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol, int id, std::vector<int>& cluster, std::vector<int>& proccessed_ids)
 {
-  proccessed_ids.push_back(id);
-  cluster.push_back(id);
-  std::vector<int> nearby = tree->search(points[id],distanceTol);
-  for (auto it = nearby.begin(); it != nearby.end(); ++it)
-  {
-    if (!((std::find(proccessed_ids.begin(), proccessed_ids.end(), *it) != proccessed_ids.end())))
+    proccessed_ids.push_back(id);
+    cluster.push_back(id);
+    std::vector<float> point_tree;
+    point_tree.push_back(cloud->points[id].x);
+    point_tree.push_back(cloud->points[id].y);
+    point_tree.push_back(cloud->points[id].z);
+    std::vector<int> nearby = tree->search(point_tree,distanceTol);
+    for (auto it = nearby.begin(); it != nearby.end(); ++it)
     {
-      proximity(points, tree, distanceTol, *it, cluster, proccessed_ids);
+        if (!((std::find(proccessed_ids.begin(), proccessed_ids.end(), *it) != proccessed_ids.end())))
+        {
+        proximity(cloud, tree, distanceTol, *it, cluster, proccessed_ids);
+        }
     }
-  }
 }
 
 template<typename PointT>
-std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
+std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(typename pcl::PointCloud<PointT>::Ptr cloud, KdTree* tree, float distanceTol)
 {
 
     // TODO: Fill out this function to return list of indices for each cluster
 
     std::vector<std::vector<int>> clusters;
-  std::vector<int> proccessed_ids;
+    std::vector<int> proccessed_ids;
 
-  for (int i = 0; i < points.size(); ++i)
-  {
-    if (!((std::find(proccessed_ids.begin(), proccessed_ids.end(), i) != proccessed_ids.end())))
+    for (int i = 0; i < cloud->points.size(); ++i)
     {
-      std::vector<int> cluster;
-      proximity(points, tree, distanceTol, i, cluster, proccessed_ids);
-      clusters.push_back(cluster);
+        if (!((std::find(proccessed_ids.begin(), proccessed_ids.end(), i) != proccessed_ids.end())))
+        {
+        std::vector<int> cluster;
+        proximity(cloud, tree, distanceTol, i, cluster, proccessed_ids);
+        clusters.push_back(cluster);
+        }
     }
-  }
- 
+    
     return clusters;
 
 }
@@ -62,13 +66,18 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::c
 {
     // Create KDtree
     KdTree* tree = new KdTree;
-    for (int i=0; i<cloud->points.size(); i++) 
-        tree->insert(cloud->points[i],i); 
+    for (int i=0; i<cloud->points.size(); i++){
+        std::vector<float> point_tree;
+        point_tree.push_back(cloud->points[i].x);
+        point_tree.push_back(cloud->points[i].y);
+        point_tree.push_back(cloud->points[i].z);
+        tree->insert(point_tree,i);
+    }
 
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
     //
-    std::vector<std::vector<int>> clusters = euclideanCluster(cloud->points, tree, clusterTolerance);
+    std::vector<std::vector<int>> clusters = euclideanCluster(cloud, tree, clusterTolerance);
     //
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
@@ -82,7 +91,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::c
         typename pcl::PointCloud<PointT>::Ptr clusterCloud(new pcl::PointCloud<PointT>());
         for(int indice: cluster)
             clusterCloud->points.push_back(cloud->points[indice]);
-        cluster_clouds->push_back(clusterCloud);
+        cluster_clouds.push_back(clusterCloud);
         ++clusterId;
     }
 
@@ -190,8 +199,8 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 
     std::vector<int> indices;
     pcl::CropBox<PointT> roof(true);
-    roof.setMin(Eigen::Vector4f(0,-1.5,-1.7,1));
-    roof.setMax(Eigen::Vector4f(5,2.6,1.7,1));
+    roof.setMin(Eigen::Vector4f(-1.5,-1.7,0,1));
+    roof.setMax(Eigen::Vector4f(2.6,1.7,-5,1));
     roof.setInputCloud(cloud_crop);
     roof.filter(indices);
 
