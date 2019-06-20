@@ -102,7 +102,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::c
 
 
 template<typename PointT>
-std::unordered_set<int> ProcessPointClouds<PointT>::ransac3D(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol)
+std::unordered_set<int> ProcessPointClouds<PointT>::ransac3D(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol, int minSizePlan)
 {
     std::unordered_set<int> inliersResult;
     srand(time(NULL));
@@ -110,39 +110,40 @@ std::unordered_set<int> ProcessPointClouds<PointT>::ransac3D(typename pcl::Point
     auto startTime = std::chrono::steady_clock::now();
 
     int cpt_max = 0;
-    for (int it = 0; it < maxIterations; it ++){
-        std::unordered_set<int> inliersResultI;
-        int n1(rand() % cloud->points.size());
-        int n2(rand() % cloud->points.size());
-        while (n1 == n2)
-            n2 = rand() % cloud->points.size();
-        int n3(rand() % cloud->points.size());
-        while (n3 == n2 || n3 == n1)
-            n3 = rand() % cloud->points.size();
-        float coeff_a = (cloud->points[n2].y - cloud->points[n1].y)*(cloud->points[n3].z-cloud->points[n1].z)-
-           (cloud->points[n2].z-cloud->points[n1].z)*(cloud->points[n3].y-cloud->points[n1].y);
-        float coeff_b = (cloud->points[n2].z - cloud->points[n1].z)*(cloud->points[n3].x-cloud->points[n1].x)-
-           (cloud->points[n2].x-cloud->points[n1].x)*(cloud->points[n3].z-cloud->points[n1].z);
-        float coeff_c = (cloud->points[n2].x - cloud->points[n1].x)*(cloud->points[n3].y-cloud->points[n1].y)-
-           (cloud->points[n2].y-cloud->points[n1].y)*(cloud->points[n3].x-cloud->points[n1].x);
-        float coeff_d = -(coeff_a*cloud->points[n1].x+coeff_b*cloud->points[n1].y+coeff_c*cloud->points[n1].z);
-        int cpt = 0;
-        for (int i = 0; i < cloud->points.size (); ++i){
-            if (i == n1 || i == n2 | i == n3)
-                continue;
-            float distance_to_plan = std::fabs(coeff_a*cloud->points[i].x+coeff_b*cloud->points[i].y+coeff_c*cloud->points[i].z+coeff_d)/
-               std::sqrt(coeff_a*coeff_a+coeff_b*coeff_b+coeff_c*coeff_c);
-            if (distance_to_plan <= distanceTol)
-            {
-             ++cpt;
-             inliersResultI.insert(i);
+    while (inliersResult.size() < minSizePlan) {
+        for (int it = 0; it < maxIterations; it ++){
+            std::unordered_set<int> inliersResultI;
+            int n1(rand() % cloud->points.size());
+            int n2(rand() % cloud->points.size());
+            while (n1 == n2)
+                n2 = rand() % cloud->points.size();
+            int n3(rand() % cloud->points.size());
+            while (n3 == n2 || n3 == n1)
+                n3 = rand() % cloud->points.size();
+            float coeff_a = (cloud->points[n2].y - cloud->points[n1].y)*(cloud->points[n3].z-cloud->points[n1].z)-
+            (cloud->points[n2].z-cloud->points[n1].z)*(cloud->points[n3].y-cloud->points[n1].y);
+            float coeff_b = (cloud->points[n2].z - cloud->points[n1].z)*(cloud->points[n3].x-cloud->points[n1].x)-
+            (cloud->points[n2].x-cloud->points[n1].x)*(cloud->points[n3].z-cloud->points[n1].z);
+            float coeff_c = (cloud->points[n2].x - cloud->points[n1].x)*(cloud->points[n3].y-cloud->points[n1].y)-
+            (cloud->points[n2].y-cloud->points[n1].y)*(cloud->points[n3].x-cloud->points[n1].x);
+            float coeff_d = -(coeff_a*cloud->points[n1].x+coeff_b*cloud->points[n1].y+coeff_c*cloud->points[n1].z);
+            int cpt = 0;
+            for (int i = 0; i < cloud->points.size (); ++i){
+                if (i == n1 || i == n2 | i == n3)
+                    continue;
+                float distance_to_plan = std::fabs(coeff_a*cloud->points[i].x+coeff_b*cloud->points[i].y+coeff_c*cloud->points[i].z+coeff_d)/
+                std::sqrt(coeff_a*coeff_a+coeff_b*coeff_b+coeff_c*coeff_c);
+                if (distance_to_plan <= distanceTol)
+                {
+                ++cpt;
+                inliersResultI.insert(i);
+                }
+            }
+            if (cpt > cpt_max){
+            inliersResult = inliersResultI;
             }
         }
-        if (cpt > cpt_max){
-        inliersResult = inliersResultI;
-        }
     }
-
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "Ransac calulation took " << elapsedTime.count() << " milliseconds" << std::endl;
@@ -152,11 +153,11 @@ std::unordered_set<int> ProcessPointClouds<PointT>::ransac3D(typename pcl::Point
 
 
 template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::segmentCloud(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol )
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::segmentCloud(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol, int minSizePlan)
 {
 
     // TODO: Change the max iteration and distance tolerance arguments for Ransac function
-    std::unordered_set<int> inliers = ransac3D(cloud, maxIterations, distanceTol);
+    std::unordered_set<int> inliers = ransac3D(cloud, maxIterations, distanceTol, minSizePlan);
 
     typename pcl::PointCloud<PointT>::Ptr plan_cloud(new pcl::PointCloud<PointT>());
     typename pcl::PointCloud<PointT>::Ptr obstacles_cloud(new pcl::PointCloud<PointT>());
@@ -374,7 +375,9 @@ BoxQ ProcessPointClouds<PointT>::BoundingBoxQ(typename pcl::PointCloud<PointT>::
     typename pcl::PointCloud<PointT>::Ptr cloudPointsProjected (new pcl::PointCloud<PointT>);
     pcl::transformPointCloud(*cluster, *cloudPointsProjected, projectionTransform);
     // Get the minimum and maximum points of the transformed cloud.
-    pcl::PointXYZ minPoint, maxPoint;
+    // auto minPoint, maxPoint;
+    template<typename PointT>  minPoint;
+    template<typename PointT>  maxPoint;
     pcl::getMinMax3D(*cloudPointsProjected, minPoint, maxPoint);
     const Eigen::Vector3f meanDiagonal = 0.5f*(maxPoint.getVector3fMap() + minPoint.getVector3fMap());
 
