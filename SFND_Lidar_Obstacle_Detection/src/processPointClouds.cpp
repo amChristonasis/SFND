@@ -201,8 +201,8 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 
     std::vector<int> indices;
     pcl::CropBox<PointT> roof(true);
-    roof.setMin(Eigen::Vector4f(-1.5,-1.7,0,1));
-    roof.setMax(Eigen::Vector4f(2.6,1.7,-5,1));
+    roof.setMin(Eigen::Vector4f(-1.5,-1.7,-1,1));
+    roof.setMax(Eigen::Vector4f(2.6,1.7,0,1));
     roof.setInputCloud(cloud_crop);
     roof.filter(indices);
 
@@ -376,8 +376,9 @@ BoxQ ProcessPointClouds<PointT>::BoundingBoxQ(typename pcl::PointCloud<PointT>::
     pcl::transformPointCloud(*cluster, *cloudPointsProjected, projectionTransform);
     // Get the minimum and maximum points of the transformed cloud.
     // auto minPoint, maxPoint;
-    template<typename PointT>  minPoint;
-    template<typename PointT>  maxPoint;
+    auto minPoint = cloudPointsProjected->points[0];
+    auto maxPoint = cloudPointsProjected->points[0];
+    
     pcl::getMinMax3D(*cloudPointsProjected, minPoint, maxPoint);
     const Eigen::Vector3f meanDiagonal = 0.5f*(maxPoint.getVector3fMap() + minPoint.getVector3fMap());
 
