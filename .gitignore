@@ -2,6 +2,7 @@
 SFND_Lidar_Obstacle_Detection/build/*
 SFND_Lidar_Obstacle_Detection/src/quiz/ransac/build/*
 SFND_Lidar_Obstacle_Detection/src/quiz/cluster/build/*
+SFND_Lidar_Obstacle_Detection/build/*
 
 # exception to the rule
 # !somefolder/.gitkeep 

@@ -102,7 +102,15 @@ int main(int argc, const char *argv[])
         cv::Rect vehicleRect(535, 180, 180, 150);
         if (bFocusOnVehicle)
         {
-            // ...
+            // imgGray = imgGray(vehicleRect);
+            vector<cv::KeyPoint> newKeypoints;
+            for (auto it = keypoints.begin(); it != keypoints.end(); ++it)
+            {
+                if (*it->pt.x >= vehicleRect.x && *it->pt.x <= vehicleRect.x - vehicleRect.width 
+                    && *it->pt.y >= vehicleRect.y && *it->pt.x <= vehicleRect.y - vehicleRect.height)
+                    newKeypoints.push_back(*it);
+            }
+            keypoints = newKeypoints;
         }
 
         //// EOF STUDENT ASSIGNMENT
