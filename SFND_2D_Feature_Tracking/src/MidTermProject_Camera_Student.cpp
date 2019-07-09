@@ -64,7 +64,7 @@ int main(int argc, const char *argv[])
         frame.cameraImg = imgGray;
         dataBuffer.push_back(frame);
         if (dataBuffer.size() > 3) {
-            dataBuffer.erase(0);
+            dataBuffer.erase(dataBuffer.begin());
         }
 
         //// EOF STUDENT ASSIGNMENT
@@ -86,9 +86,9 @@ int main(int argc, const char *argv[])
         }
         else if (detectorType.compare("HARRIS") == 0)
         {
-            detKeypointsHarris(keypoints, imgGray, false)
+            detKeypointsHarris(keypoints, imgGray, false);
         }
-        else 
+        else
         {
             detKeypointsModern(keypoints, imgGray, detectorType, false);
         }
@@ -106,11 +106,13 @@ int main(int argc, const char *argv[])
             vector<cv::KeyPoint> newKeypoints;
             for (auto it = keypoints.begin(); it != keypoints.end(); ++it)
             {
-                if (*it->pt.x >= vehicleRect.x && *it->pt.x <= vehicleRect.x - vehicleRect.width 
-                    && *it->pt.y >= vehicleRect.y && *it->pt.x <= vehicleRect.y - vehicleRect.height)
+                if (it->pt.x >= vehicleRect.x && it->pt.x <= vehicleRect.x + vehicleRect.width 
+                    && it->pt.y >= vehicleRect.y && it->pt.y <= vehicleRect.y + vehicleRect.height)
                     newKeypoints.push_back(*it);
+                // cout << it->pt.x << ", " << it->pt.y << ", " << vehicleRect.x << ", " << vehicleRect.width << endl;
             }
             keypoints = newKeypoints;
+            cout << detectorType << " detection with n=" << keypoints.size() << " keypoints " << endl;
         }
 
         //// EOF STUDENT ASSIGNMENT
