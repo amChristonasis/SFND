@@ -74,7 +74,7 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SHITOMASI"; //SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, and SIFT
+        string detectorType = "SIFT"; //SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, and SIFT
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
@@ -112,7 +112,7 @@ int main(int argc, const char *argv[])
                 // cout << it->pt.x << ", " << it->pt.y << ", " << vehicleRect.x << ", " << vehicleRect.width << endl;
             }
             keypoints = newKeypoints;
-            cout << detectorType << " detection with n=" << keypoints.size() << " keypoints " << endl;
+            cout << detectorType << " detection --------------------------------- with n=" << keypoints.size() << " keypoints " << endl;
         }
 
         //// EOF STUDENT ASSIGNMENT
