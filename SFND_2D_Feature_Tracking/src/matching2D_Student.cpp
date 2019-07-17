@@ -87,7 +87,7 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descr
     {
         extractor = cv::AKAZE::create();
     }
-    else if (descriptorType.compare("AKAZE") == 0)
+    else if (descriptorType.compare("SIFT") == 0)
     {
         extractor = cv::xfeatures2d::SIFT::create();
     }
