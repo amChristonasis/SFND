@@ -148,7 +148,33 @@ void computeTTCCamera(std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPo
 void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
                      std::vector<LidarPoint> &lidarPointsCurr, double frameRate, double &TTC)
 {
-    // ...
+    auto [min_z_prev, max_z_prev] = std::minmax_element(lidarPointsPrev.begin().z, lidarPointsPrev.end().z);
+    auto [min_z_curr, max_z_curr] = std::minmax_element(lidarPointsCurr.begin().z, lidarPointsCurr.end().z);
+    auto [min_y_prev, max_y_prev] = std::minmax_element(lidarPointsPrev.begin().y, lidarPointsPrev.end().y);
+    auto [min_y_curr, max_y_curr] = std::minmax_element(lidarPointsCurr.begin().y, lidarPointsCurr.end().y);
+
+    double window_width = 2.0;
+    double window_height = 1.0;
+
+    std::vector<int> lidarPointsPrevWindow, lidarPointsCurrWindow;
+  
+  	for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it)
+    {
+        if (it->z < window_height/2 + (min_z_prev + max_z_prev)/2 && it->z > - window_height/2 + (min_z_prev + max_z_prev)/2
+            && it->y < window_width/2 + (min_y_prev + max_y_prev)/2 && it->y > -window_width/2 + (min_y_prev + max_y_prev)/2)
+        	lidarPointsPrevWindow.push_back(it->x);
+    }
+    double average_prev = accumulate(lidarPointsPrevWindow.begin(), lidarPointsPrevWindow.end(), 0.0)/lidarPointsPrevWindow.size(); 
+
+    for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
+    {
+        if (it->z < window_height/2 + (min_z_curr + max_z_curr)/2 && it->z > - window_height/2 + (min_z_curr + max_z_curr)/2
+            && it->y < window_width/2 + (min_y_curr + max_y_curr)/2 && it->y > -window_width/2 + (min_y_curr + max_y_curr)/2)
+        	lidarPointsCurrWindow.push_back(it->x);
+    }
+    double average_curr = accumulate(lidarPointsCurrWindow.begin(), lidarPointsCurrWindow.end(), 0.0)/lidarPointsCurrWindow.size();
+
+    TTC = average_curr / ((average_prev - average_curr)*frameRate);
 }
 
 
