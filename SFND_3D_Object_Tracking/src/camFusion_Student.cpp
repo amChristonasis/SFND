@@ -148,10 +148,28 @@ void computeTTCCamera(std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPo
 void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
                      std::vector<LidarPoint> &lidarPointsCurr, double frameRate, double &TTC)
 {
-    auto [min_z_prev, max_z_prev] = std::minmax_element(lidarPointsPrev.begin().z, lidarPointsPrev.end().z);
-    auto [min_z_curr, max_z_curr] = std::minmax_element(lidarPointsCurr.begin().z, lidarPointsCurr.end().z);
-    auto [min_y_prev, max_y_prev] = std::minmax_element(lidarPointsPrev.begin().y, lidarPointsPrev.end().y);
-    auto [min_y_curr, max_y_curr] = std::minmax_element(lidarPointsCurr.begin().y, lidarPointsCurr.end().y);
+    float min_z_prev = lidarPointsPrev[0].z;
+    float max_z_prev = lidarPointsPrev[0].z;
+    float min_z_curr = lidarPointsCurr[0].z;
+    float max_z_curr = lidarPointsCurr[0].z;
+    float min_y_prev = lidarPointsPrev[0].y;
+    float max_y_prev = lidarPointsPrev[0].y;
+    float min_y_curr = lidarPointsCurr[0].y;
+    float max_y_curr = lidarPointsCurr[0].y;
+
+    for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it) {
+        if (it->z > max_z_prev) max_z_prev = it->z;
+        if (it->z < min_z_prev) min_z_prev = it->z;
+        if (it->y > max_y_prev) max_y_prev = it->y;
+        if (it->y < min_y_prev) min_y_prev = it->y;
+    }
+
+    for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it) {
+        if (it->z > max_z_curr) max_z_curr = it->z;
+        if (it->z < min_z_curr) min_z_curr = it->z;
+        if (it->y > max_y_curr) max_y_curr = it->y;
+        if (it->y < min_y_curr) min_y_curr = it->y;
+    }
 
     double window_width = 2.0;
     double window_height = 1.0;
@@ -187,16 +205,23 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
     // for (auto it = multimap_bb_matches.begin(); it != multimap_bb_matches.end(); ++it){
 
     // }
-    multimap <int, int> bins;
+    multimap <pair<int,int>, int> bins;
+    int cpt_max = 0;
+    pair<int, int> pair_max;
     for (auto itCurrent = currFrame.boundingBoxes.begin(); itCurrent != currFrame.boundingBoxes.end(); ++itCurrent) {
         for (auto itPrevious = prevFrame.boundingBoxes.begin(); itPrevious != prevFrame.boundingBoxes.end(); ++itPrevious) {
             for (auto itMatch = matches.begin(); itMatch != matches.end(); ++itMatch) {
                 if (itCurrent->roi.contains(currFrame.keypoints[itMatch->trainIdx].pt)) {
                     if (itPrevious->roi.contains(prevFrame.keypoints[itMatch->queryIdx].pt)) {
-                        bins[itCurrent->boxID][itPrevious->boxID]++;
+                        bins.emplace(pair<int,int>(itCurrent->boxID,itPrevious->boxID),1);
+                        if (bins.count(pair<int,int>(itCurrent->boxID,itPrevious->boxID)) > cpt_max) {
+                            cpt_max = bins.count(pair<int,int>(itCurrent->boxID,itPrevious->boxID));
+                            pair_max = pair<int,int>(itCurrent->boxID,itPrevious->boxID);
+                        }
                     }
                 }
             }
         }
     }
+    bbBestMatches.insert(pair_max);
 }

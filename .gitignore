@@ -8,6 +8,7 @@ compute_ttc_lidar/TTC_lidar/build/*
 compute_ttc_camera/TTC_camera/build/*
 */.vscode/*
 *.dat
+SFND_3D_Object_Tracking/build/*
 
 # exception to the rule
 # !somefolder/.gitkeep 
