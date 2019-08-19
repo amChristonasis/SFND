@@ -4,6 +4,10 @@ SFND_Lidar_Obstacle_Detection/src/quiz/ransac/build/*
 SFND_Lidar_Obstacle_Detection/src/quiz/cluster/build/*
 SFND_Lidar_Obstacle_Detection/build/*
 SFND_2D_Feature_Tracking/build/*
+compute_ttc_lidar/TTC_lidar/build/*
+compute_ttc_camera/TTC_camera/build/*
+*/.vscode/*
+*.dat
 
 # exception to the rule
 # !somefolder/.gitkeep 
