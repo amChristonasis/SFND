@@ -9,6 +9,7 @@ compute_ttc_camera/TTC_camera/build/*
 */.vscode/*
 *.dat
 SFND_3D_Object_Tracking/build/*
+SFND_3D_Object_Tracking/dat/yolo/*
 
 # exception to the rule
 # !somefolder/.gitkeep 
