@@ -140,7 +140,7 @@ int main(int argc, const char *argv[])
         
         
         // REMOVE THIS LINE BEFORE PROCEEDING WITH THE FINAL PROJECT
-        continue; // skips directly to the next image without processing what comes beneath
+        // continue; // skips directly to the next image without processing what comes beneath
 
         /* DETECT IMAGE KEYPOINTS */
 
@@ -228,7 +228,7 @@ int main(int argc, const char *argv[])
             // store matches in current data frame
             (dataBuffer.end()-1)->bbMatches = bbBestMatches;
 
-            cout << "#8 : TRACK 3D OBJECT BOUNDING BOXES done" << endl;
+            cout << "#8 : TRACK 3D OBJECT BOUNDING BOXES done with : " << bbBestMatches.size() << endl ;
 
 
             /* COMPUTE TTC ON OBJECT IN FRONT */
@@ -243,6 +243,7 @@ int main(int argc, const char *argv[])
                     if (it1->second == it2->boxID) // check wether current match partner corresponds to this BB
                     {
                         currBB = &(*it2);
+                        cout << "currBB" << endl;
                     }
                 }
 
@@ -251,8 +252,11 @@ int main(int argc, const char *argv[])
                     if (it1->first == it2->boxID) // check wether current match partner corresponds to this BB
                     {
                         prevBB = &(*it2);
+                        cout << "prevBB" << endl;
                     }
                 }
+
+                cout << "currBB : " << currBB->lidarPoints.size() <<  ", prevBB : " << prevBB->lidarPoints.size() << endl;
 
                 // compute TTC for current match
                 if( currBB->lidarPoints.size()>0 && prevBB->lidarPoints.size()>0 ) // only compute TTC if we have Lidar points
