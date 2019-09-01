@@ -264,23 +264,39 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
     // for (auto it = multimap_bb_matches.begin(); it != multimap_bb_matches.end(); ++it){
 
     // }
-    multimap <pair<int,int>, int> bins;
-    int cpt_max = 0;
-    pair<int, int> pair_max;
+    std::vector< std::vector<int> > bins;
+    int max = 0;
+    int indMax = 0;
+    std::vector<bool> processed;
+    int threshold = 100;
+    std::cout << "Enter" << std::endl;
     for (auto itCurrent = currFrame.boundingBoxes.begin(); itCurrent != currFrame.boundingBoxes.end(); ++itCurrent) {
         for (auto itPrevious = prevFrame.boundingBoxes.begin(); itPrevious != prevFrame.boundingBoxes.end(); ++itPrevious) {
             for (auto itMatch = matches.begin(); itMatch != matches.end(); ++itMatch) {
                 if (itCurrent->roi.contains(currFrame.keypoints[itMatch->trainIdx].pt)) {
                     if (itPrevious->roi.contains(prevFrame.keypoints[itMatch->queryIdx].pt)) {
-                        bins.emplace(pair<int,int>(itCurrent->boxID,itPrevious->boxID),1);
-                        if (bins.count(pair<int,int>(itCurrent->boxID,itPrevious->boxID)) > cpt_max) {
-                            cpt_max = bins.count(pair<int,int>(itCurrent->boxID,itPrevious->boxID));
-                            pair_max = pair<int,int>(itCurrent->boxID,itPrevious->boxID);
-                        }
+                        bins[itCurrent->boxID][itPrevious->boxID]++;
                     }
                 }
             }
         }
     }
-    bbBestMatches.insert(pair_max);
+    std::cout << "Pass 1" << std::endl;
+
+    for (int i=0; i<currFrame.boundingBoxes.size(); i++){
+        for (int j=0; j<prevFrame.boundingBoxes.size(); j++){
+            if (bins[i][j]>max){
+                max = bins[i][j];
+                indMax = j;
+            }
+        }
+        std::cout << "max = " <<  max << std::endl;
+        if(max>=threshold && !processed[indMax]){
+            bbBestMatches.insert({prevFrame.boundingBoxes[indMax].boxID,currFrame.boundingBoxes[i].boxID});
+            processed[indMax] = true;
+        }
+        max = 0;
+        indMax = 0;
+    }
+    std::cout << "Pass 2" << std::endl;
 }
