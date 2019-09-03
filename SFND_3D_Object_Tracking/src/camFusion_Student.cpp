@@ -257,13 +257,6 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
 
 void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bbBestMatches, DataFrame &prevFrame, DataFrame &currFrame)
 {
-    // multimap<int, int> multimap_bb_matches; // trainIdx; bb nb
-    // for (auto it = matches.begin(); it != matches.end(); ++it){
-    //     multimap_bb_matches.insert(pair<int, int>(prevFrame.boundingBoxes[it->trainIdx].boxId, currFrame.boundingBoxes[it->trainIdx].boxId));
-    // }
-    // for (auto it = multimap_bb_matches.begin(); it != multimap_bb_matches.end(); ++it){
-
-    // }
     std::vector< std::vector<int> > bins;
     int max = 0;
     int indMax = 0;
@@ -275,7 +268,9 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
             for (auto itMatch = matches.begin(); itMatch != matches.end(); ++itMatch) {
                 if (itCurrent->roi.contains(currFrame.keypoints[itMatch->trainIdx].pt)) {
                     if (itPrevious->roi.contains(prevFrame.keypoints[itMatch->queryIdx].pt)) {
+                        std::cout << "Saving in bins" << std::endl;
                         bins[itCurrent->boxID][itPrevious->boxID]++;
+                        std::cout << "Saved in bins !" << std::endl;
                     }
                 }
             }
